@@ -967,16 +967,22 @@ function mapTM(ev){
   }catch(_){return null;}
 }
 async function fetchTicketmaster(){
-  if(!state.tmKey)return[];
   const start=new Date().toISOString().slice(0,19)+"Z";
-  const base="https://app.ticketmaster.com/discovery/v2/events.json";
-  const params=new URLSearchParams({apikey:state.tmKey,dmaId:"345",sort:"date,asc",size:"100",startDateTime:start,locale:"*"});
-  const r=await fetch(base+"?"+params.toString());
-  if(r.status===401)throw new Error("Ticketmaster: invalid API key");
-  if(!r.ok)throw new Error("Ticketmaster: HTTP "+r.status);
-  const d=await r.json();
-  const evs=(d._embedded&&d._embedded.events)||[];
-  return evs.map(mapTM).filter(Boolean);
+  const params={dmaId:"345",sort:"date,asc",size:"100",startDateTime:start,locale:"*"};
+  // Preferred: backend proxy keeps the key server-side, so live events work for every
+  // visitor with nothing to enter. Falls through if there's no backend (e.g. local file).
+  try{
+    const r=await fetch("/.netlify/functions/marquee",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"ticketmaster",params})});
+    if(r.ok){const d=await r.json();const evs=(d&&d._embedded&&d._embedded.events)||[];return evs.map(mapTM).filter(Boolean);}
+  }catch(_){/* no backend reachable — try a client-side key next */}
+  // Fallback: a key pasted in settings or baked into this file.
+  if(!state.tmKey)return[];
+  const qs=new URLSearchParams({apikey:state.tmKey,...params});
+  const r2=await fetch("https://app.ticketmaster.com/discovery/v2/events.json?"+qs.toString());
+  if(r2.status===401)throw new Error("Ticketmaster: invalid API key");
+  if(!r2.ok)throw new Error("Ticketmaster: HTTP "+r2.status);
+  const d2=await r2.json();
+  return((d2._embedded&&d2._embedded.events)||[]).map(mapTM).filter(Boolean);
 }
 
 /* ---- Provider: LLM web search (catch-all for venues with no API) ---- */
@@ -1032,7 +1038,7 @@ async function refreshLive(silent){
   if(state.loading)return;
   setLoading(true);setRefreshing(true);if(!hasLive())renderMain();
   const provs=[];
-  if(state.tmKey)provs.push({label:"Ticketmaster",run:fetchTicketmaster});
+  provs.push({label:"Ticketmaster",run:fetchTicketmaster}); // self-gates: backend proxy, then client key, else []
   provs.push({label:"Web search",run:()=>fetchWebSearch()});
   let added=0;const errors=[];
   const results=await Promise.allSettled(provs.map(p=>p.run()));
@@ -1108,7 +1114,7 @@ function applyTheme(){
 function renderKeyStat(){
   const s=$("#keyStat");
   if(state.tmKey)s.innerHTML=`<span class="ld live"></span> Connected — live Ticketmaster events on.`;
-  else s.innerHTML=`<span class="ld"></span> Not set. <a href="https://developer.ticketmaster.com/products-and-docs/apis/getting-started/" target="_blank" rel="noopener">Get a free key →</a>`;
+  else s.innerHTML=`<span class="ld"></span> Optional here — leave blank if the site has a server key. <a href="https://developer.ticketmaster.com/products-and-docs/apis/getting-started/" target="_blank" rel="noopener">Get a free key →</a>`;
 }
 
 /* ---- wiring ---- */
@@ -1185,8 +1191,8 @@ const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.t
   ensureSelections();
   renderSidebar();renderMain();updateHero();
   document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
-  // Pull live on load, then poll.
-  if(state.tmKey||state.sources.length)refreshLive(true);
+  // Pull live on load, then poll. Providers self-gate, so this is safe with or without keys.
+  refreshLive(true);
   startAuto();
 })();
 </script>
