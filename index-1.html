@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Marquee — Everything happening in New York</title>
+<title>Marquee NYC — Everything happening in New York</title>
 <meta name="description" content="Live listings for every concert, Broadway show, opera, classical performance and game in New York. Filter by venue, save favorites, export to your calendar, and buy tickets on the official page.">
 <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Marquee — Everything happening in New York">
+<meta property="og:title" content="Marquee NYC — Everything happening in New York">
 <meta property="og:description" content="Symphony to slam dunks. Live NYC events in one place.">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230071e3'/%3E%3Ctext x='16' y='23' font-family='-apple-system,Helvetica,Arial' font-size='20' font-weight='700' fill='white' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
@@ -158,6 +158,23 @@
   .side-actions{display:flex;gap:6px;padding:6px 8px 10px}
   .side-actions button{flex:1;font-size:12.5px;padding:7px;border-radius:9px;background:var(--bg);font-weight:500;color:var(--text-2);transition:.14s}
   .side-actions button:hover{color:var(--blue)}
+
+  /* source filter */
+  .srcsec{margin:4px 4px 8px;border-bottom:1px solid var(--line-soft);padding-bottom:6px}
+  .src-head{cursor:default}
+  .src-head:hover{background:transparent}
+  .src-head .srcall{margin-left:auto;font-size:11.5px;color:var(--link);font-weight:600;padding:2px 6px;border-radius:6px}
+  .src-head .srcall:hover{background:var(--bg)}
+  .srcrows{padding:2px 4px 2px}
+  .srcrow{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:9px;cursor:pointer;transition:.12s}
+  .srcrow:hover{background:var(--bg)}
+  .srcrow.sel .ck{background:var(--blue);border-color:var(--blue)}
+  .srcrow.sel .ck svg{opacity:1;transform:scale(1)}
+  .srcname{flex:1;min-width:0;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srccount{font-size:11px;color:var(--text-3);font-weight:600;flex:0 0 auto}
+  .srcsolo{flex:0 0 auto;font-size:10.5px;font-weight:600;color:var(--link);opacity:0;transition:.12s;padding:2px 7px;border-radius:980px;border:1px solid color-mix(in srgb,var(--blue) 35%,transparent)}
+  .srcrow:hover .srcsolo{opacity:1}
+  .srcsolo:hover{background:var(--blue);color:#fff}
 
   /* palette popover */
   .palette{position:fixed;z-index:90;background:var(--surface);border:1px solid var(--line);border-radius:14px;
@@ -354,7 +371,7 @@
 
 <nav>
   <div class="nav-in">
-    <div class="wordmark"><span class="glyph">M</span> Marquee</div>
+    <div class="wordmark"><span class="glyph">M</span> Marquee NYC</div>
     <div class="nav-grow"></div>
     <button class="nav-btn" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">
       <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
@@ -378,7 +395,7 @@
         <div class="keystat" id="keyStat"></div>
         <div class="sec-h">Auto-refresh</div>
         <div class="toggle">
-          <div><div class="tl">Pull events in real time</div><div class="td">Refresh automatically every 5 minutes</div></div>
+          <div><div class="tl">Pull events in real time</div><div class="td">Auto-updates Ticketmaster every 5 min · venue-website search runs on manual refresh</div></div>
           <button class="sw" id="autoSw" role="switch" aria-label="Auto-refresh"></button>
         </div>
         <div class="sec-h">Appearance</div>
@@ -401,7 +418,7 @@
 </nav>
 
 <section class="hero">
-  <div class="eyebrow reveal">Marquee 2.0</div>
+  <div class="eyebrow reveal">Marquee NYC</div>
   <h1 class="reveal">Everything happening<br>in New York.</h1>
   <p class="sub reveal">Symphony to slam dunks. Browse it all in one place, filter by venue, and save what you love to your calendar.</p>
   <div class="stats reveal" id="heroStats"></div>
@@ -449,6 +466,7 @@
       <button id="selAll">Select all</button>
       <button id="selNone">Clear all</button>
     </div>
+    <div id="srcFilter"></div>
     <div id="catList"></div>
   </aside>
 
@@ -465,7 +483,7 @@
 </div>
 
 <footer>
-  Marquee 2.0 · Live data from Ticketmaster &amp; web search, de-duplicated · Calendar export works with Apple Calendar, Google Calendar &amp; Outlook<br>
+  Marquee NYC · Live data from Ticketmaster &amp; Google Search, de-duplicated · Calendar export works with Apple Calendar, Google Calendar &amp; Outlook<br>
   <span id="footNote"></span>
 </footer>
 
@@ -505,45 +523,13 @@ const CURATED = [
 const vkey=(c,n)=>c+"|"+n;
 const SWATCHES=["#0071e3","#5e5ce6","#00a17a","#34c759","#30b0c7","#ff9f0a","#ff3b30","#ff2d55","#bf5af2","#8e8e93"];
 
-function buildSamples(){
-  const T=[
-    [2,19,30,2.5,"classical","New York Philharmonic","Beethoven Symphony No. 9","cond. Gustavo Dudamel","$45–185","The complete Ninth with the Westminster Symphonic Choir — Beethoven's towering 'Ode to Joy.'"],
-    [9,19,30,2,"classical","New York Philharmonic","Mahler: Symphony No. 5","New York Philharmonic","$40–160","Mahler's monumental Fifth, anchored by the famous Adagietto."],
-    [4,19,30,3,"classical","Metropolitan Opera","La Bohème","Puccini","$33–298","Zeffirelli's beloved production of Puccini's heartbreaking love story."],
-    [12,19,0,3,"classical","Metropolitan Opera","Carmen","Bizet","$33–298","Bizet's fiery, passionate masterpiece returns to the Met stage."],
-    [6,20,0,2,"classical","Carnegie Hall","Yo-Yo Ma plays Bach","Yo-Yo Ma","$50–220","The legendary cellist performs the complete Bach Cello Suites."],
-    [18,20,0,2,"classical","Carnegie Hall","Vienna Philharmonic","Vienna Philharmonic","$70–340","One of the world's great orchestras on tour."],
-    [1,19,0,2.75,"broadway","Broadway","Hamilton","Richard Rodgers Theatre","$199–699","Lin-Manuel Miranda's revolutionary musical about Alexander Hamilton."],
-    [3,19,0,2.5,"broadway","Broadway","The Lion King","Minskoff Theatre","$129–399","Disney's Tony-winning spectacle, now in its third decade."],
-    [7,20,0,2.75,"broadway","Broadway","Wicked","Gershwin Theatre","$149–499","The untold story of the witches of Oz."],
-    [11,19,0,2.5,"broadway","Broadway","MJ the Musical","Neil Simon Theatre","$99–349","The electrifying musical built around Michael Jackson's artistry."],
-    [15,19,30,2.25,"broadway","Lincoln Center Theater","The Skin of Our Teeth","Vivian Beaumont","$77–177","Thornton Wilder's wild Pulitzer-winning comedy of survival."],
-    [2,20,0,2.5,"concerts","Madison Square Garden","Billie Eilish — Hit Me Hard Tour","Billie Eilish","$95–450","The Grammy-winning artist brings her arena spectacle to MSG."],
-    [8,20,0,2.5,"concerts","Madison Square Garden","The Weeknd","The Weeknd","$120–600","After Hours til Dawn — a stadium-scale production."],
-    [5,20,0,2,"concerts","Barclays Center","SZA — Lana Tour","SZA","$85–380","The SOS superstar live in Brooklyn."],
-    [13,20,0,2,"concerts","Radio City Music Hall","Hozier","Hozier","$75–250","An intimate evening at the iconic Radio City."],
-    [10,20,0,2,"concerts","Brooklyn Steel","Vampire Weekend","Vampire Weekend","$65","Indie favorites in a packed Williamsburg warehouse."],
-    [20,20,0,2.5,"concerts","Barclays Center","Bad Bunny","Bad Bunny","$110–520","Un Verano Sin Ti — the global phenomenon live."],
-    [1,19,30,2.5,"sports","Madison Square Garden","Knicks vs. Boston Celtics","New York Knicks","$60–900","Atlantic Division rivalry night at the Garden."],
-    [6,19,0,2.5,"sports","Madison Square Garden","Rangers vs. Boston Bruins","New York Rangers","$55–650","Original Six hockey under the lights."],
-    [3,13,5,3,"sports","Yankee Stadium","Yankees vs. Red Sox","New York Yankees","$25–400","Baseball's greatest rivalry in the Bronx."],
-    [9,18,40,3,"sports","Citi Field","Mets vs. Atlanta Braves","New York Mets","$22–300","NL East showdown in Flushing."],
-    [14,19,30,2.5,"sports","Barclays Center","Nets vs. Milwaukee Bucks","Brooklyn Nets","$45–520","Brooklyn hosts the Bucks in a marquee matchup."],
-  ];
-  const now=new Date();
-  return T.map((r,i)=>{
-    const[off,h,m,dur,cat,venue,title,artist,price,desc]=r;
-    const s=new Date(now);s.setDate(now.getDate()+off);s.setHours(h,m,0,0);
-    const e=new Date(s.getTime()+dur*3600*1000);
-    const v=CURATED.find(x=>x.name===venue&&x.cat===cat)||CURATED.find(x=>x.name===venue);
-    return{id:"s"+i,title,artist,venue,area:v?v.area:"New York",cat,price,start:s.toISOString(),end:e.toISOString(),desc,ticketUrl:v?v.url:"#",image:"",source:"Sample data",provider:""};
-  });
-}
+
 
 const DEFAULT_SOURCES=["https://www.carnegiehall.org/Events","https://www.metopera.org/season/2025-26-season/","https://www.broadway.org/shows","https://www.wnyc.org/events"];
 let state={
   view:"list",query:"",dateFilter:"all",savedOnly:false,sort:"date",
   selected:new Set(),known:new Set(),
+  selectedSources:new Set(),knownSources:new Set(),
   saved:new Set(),venueColors:{},
   events:[],liveEvents:[],sources:[...DEFAULT_SOURCES],
   calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),lastUpdated:null,
@@ -565,7 +551,9 @@ const store={
 async function saveState(){
   try{await store.set("marquee2:prefs",JSON.stringify({
     view:state.view,dateFilter:state.dateFilter,savedOnly:state.savedOnly,sort:state.sort,
-    selected:[...state.selected],known:[...state.known],saved:[...state.saved],venueColors:state.venueColors,
+    selected:[...state.selected],known:[...state.known],
+    selectedSources:[...state.selectedSources],knownSources:[...state.knownSources],
+    saved:[...state.saved],venueColors:state.venueColors,
     sources:state.sources,liveEvents:state.liveEvents,lastUpdated:state.lastUpdated,
     tmKey:state.tmKey,autoRefresh:state.autoRefresh,theme:state.theme,
   }));}catch(e){}
@@ -581,6 +569,8 @@ async function loadState(){
     if(p.sort)state.sort=p.sort;
     if(Array.isArray(p.selected))state.selected=new Set(p.selected);
     if(Array.isArray(p.known))state.known=new Set(p.known);
+    if(Array.isArray(p.selectedSources))state.selectedSources=new Set(p.selectedSources);
+    if(Array.isArray(p.knownSources))state.knownSources=new Set(p.knownSources);
     if(Array.isArray(p.saved))state.saved=new Set(p.saved);
     if(p.venueColors)state.venueColors=p.venueColors;
     if(Array.isArray(p.sources))state.sources=p.sources;
@@ -676,6 +666,7 @@ function filtered(){
   let arr=displayEvents().filter(e=>{
     if(state.savedOnly&&!state.saved.has(e.id))return false;
     if(!state.selected.has(vkey(e.cat,e.venue)))return false;
+    if(state.knownSources.size&&!state.selectedSources.has(e.source||"Other"))return false;
     if(!inDateRange(e))return false;
     if(q){const hay=(e.title+" "+(e.artist||"")+" "+e.venue+" "+(CATEGORIES[e.cat]?CATEGORIES[e.cat].label:"")+" "+(e.desc||"")).toLowerCase();if(!hay.includes(q))return false;}
     return true;
@@ -704,11 +695,50 @@ function ensureSelections(){
     if(!state.known.has(k)){state.known.add(k);state.selected.add(k);changed=true;}
   });
   CURATED.forEach(v=>{const k=vkey(v.cat,v.name);if(!state.known.has(k)){state.known.add(k);state.selected.add(k);changed=true;}});
+  ensureSourceSelections();
   return changed;
+}
+function ensureSourceSelections(){
+  allEvents().forEach(e=>{const s=e.source||"Other";if(!state.knownSources.has(s)){state.knownSources.add(s);state.selectedSources.add(s);}});
+}
+function buildSourceIndex(){
+  const idx=new Map();
+  displayEvents().forEach(e=>{const s=e.source||"Other";idx.set(s,(idx.get(s)||0)+1);});
+  return idx;
+}
+
+/* ---- source filter ---- */
+function renderSourceFilter(){
+  const host=$("#srcFilter");if(!host)return;
+  const idx=buildSourceIndex();
+  if(idx.size<=1){host.innerHTML="";return;} // nothing to filter until 2+ sources exist
+  const entries=[...idx.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  const on=entries.filter(([s])=>state.selectedSources.has(s)).length;
+  let rows="";
+  entries.forEach(([s,n])=>{
+    const sel=state.selectedSources.has(s);
+    rows+=`<div class="srcrow${sel?" sel":""}" data-s="${esc(s)}">
+      <span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"/></svg></span>
+      <span class="srcname" title="${esc(s)}">${esc(s)}</span>
+      <button class="srcsolo" data-s="${esc(s)}" title="Show only ${esc(s)}">Only</button>
+      <span class="srccount">${n}</span>
+    </div>`;
+  });
+  host.innerHTML=`<div class="cat srcsec"><div class="cat-head src-head"><span class="emoji">🌐</span><span class="name">Sources</span><span class="n">${on}/${idx.size}</span><button class="x srcall">All</button></div><div class="srcrows">${rows}</div></div>`;
+  host.querySelector(".srcall").addEventListener("click",e=>{e.stopPropagation();state.selectedSources=new Set([...idx.keys()]);saveState();renderSourceFilter();renderMain();});
+  host.querySelectorAll(".srcrow").forEach(r=>{
+    r.addEventListener("click",e=>{
+      const s=r.dataset.s;
+      if(e.target.closest(".srcsolo")){e.stopPropagation();state.selectedSources=new Set([s]);saveState();renderSourceFilter();renderSidebar();renderMain();return;}
+      state.selectedSources.has(s)?state.selectedSources.delete(s):state.selectedSources.add(s);
+      saveState();renderSourceFilter();renderMain();
+    });
+  });
 }
 
 /* ---- sidebar ---- */
 function renderSidebar(){
+  renderSourceFilter();
   const idx=buildVenueIndex();
   const host=$("#catList");host.innerHTML="";
   Object.entries(CATEGORIES).forEach(([cat,meta])=>{
@@ -760,7 +790,7 @@ function renderMain(){
   const up=$("#updated");
   if(state.loading&&!hasLive())up.innerHTML=`<span class="ld live"></span> Loading live events…`;
   else if(state.lastUpdated)up.innerHTML=`<span class="ld live"></span> Live · updated ${new Date(state.lastUpdated).toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}${state.autoRefresh?" · auto":""}`;
-  else up.innerHTML=`<span class="ld"></span> Sample data — add a key for live`;
+  else up.innerHTML=`<span class="ld"></span> No live events yet — tap ↻ to load`;
   // date-chip counts
   document.querySelectorAll("#dateChips .chip-f:not(.save)").forEach(b=>{
     const f=b.dataset.d,prev=state.dateFilter;state.dateFilter=f;
@@ -998,6 +1028,7 @@ async function callClaude(prompt){
   const data=await res.json();
   return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
 }
+function hostLabel(u){try{return new URL(u).hostname.replace(/^www\./,"");}catch(_){return"";}}
 function parseEvents(text,src){
   const s=text.indexOf("["),e=text.lastIndexOf("]");if(s<0||e<0)return[];
   let arr;try{arr=JSON.parse(text.slice(s,e+1));}catch(_){return[];}
@@ -1006,7 +1037,8 @@ function parseEvents(text,src){
     if(!o||!o.title||!o.date)return;
     let iso;try{const dt=new Date(o.date+(o.time?" "+o.time:" 19:30"));if(isNaN(dt))return;iso=dt.toISOString();}catch(_){return;}
     const cat=normalizeCat(o.category||o.type),mp=matchVenue(o.venue,cat);
-    out.push({id:"l"+Date.now()+"_"+i,title:String(o.title).slice(0,140),artist:o.artist?String(o.artist).slice(0,90):"",venue:mp.venue,area:o.area||"New York",cat:mp.cat,price:o.price?String(o.price).slice(0,40):"",start:iso,end:new Date(new Date(iso).getTime()+2.5*3600*1000).toISOString(),desc:o.description?String(o.description).slice(0,300):"",ticketUrl:o.ticketUrl||o.url||mp.url||"#",image:"",status:"",source:src,provider:"websearch",added:Date.now()});
+    const tu=o.ticketUrl||o.url||mp.url||"#";
+    out.push({id:"l"+Date.now()+"_"+i,title:String(o.title).slice(0,140),artist:o.artist?String(o.artist).slice(0,90):"",venue:mp.venue,area:o.area||"New York",cat:mp.cat,price:o.price?String(o.price).slice(0,40):"",start:iso,end:new Date(new Date(iso).getTime()+2.5*3600*1000).toISOString(),desc:o.description?String(o.description).slice(0,300):"",ticketUrl:tu,image:"",status:"",source:hostLabel(tu)||src,provider:"websearch",added:Date.now()});
   });
   return out;
 }
@@ -1039,7 +1071,7 @@ async function refreshLive(silent){
   setLoading(true);setRefreshing(true);if(!hasLive())renderMain();
   const provs=[];
   provs.push({label:"Ticketmaster",run:fetchTicketmaster}); // self-gates: backend proxy, then client key, else []
-  provs.push({label:"Web search",run:()=>fetchWebSearch()});
+  if(!silent)provs.push({label:"Web search",run:()=>fetchWebSearch()}); // Google Search grounding — manual refresh only, not the background timer
   let added=0;const errors=[];
   const results=await Promise.allSettled(provs.map(p=>p.run()));
   results.forEach((r,i)=>{
@@ -1065,7 +1097,7 @@ function tmHint(errors){
 function deepUrl(u){try{const x=new URL(u);return x.pathname.replace(/\/+$/,"").split("/").filter(Boolean).length>=2;}catch(_){return false;}}
 async function fetchFromSource(url){
   setLoading(true);const g=$("#srcGo");const old=g.textContent;g.disabled=true;g.innerHTML=`<span class="spinner"></span>`;
-  const label="From "+url.replace(/^https?:\/\/(www\.)?/,"").split("/")[0];
+  const site=hostLabel(url)||url.replace(/^https?:\/\/(www\.)?/,"").split("/")[0],label=site;
   try{
     const prompt=`Use web search to look at this page and extract the upcoming event(s) shown on it: ${url}
 Cover concerts, theater, opera, classical, talks/live shows, sports or festivals. If it is a SINGLE event page, return just that one event with its real date.
@@ -1073,10 +1105,10 @@ Return ONLY a JSON array (no prose/markdown) of up to 10 events. Keys exactly: "
 For "ticketUrl" give the DIRECT page to buy that specific event — prefer the page's own buy/tickets link; if there is none, use this exact URL: ${url}. Use real info. Start with [ end with ].`;
     const evs=parseEvents(await callClaude(prompt),label).map(e=>{
       const tu=(e.ticketUrl&&e.ticketUrl!=="#"&&deepUrl(e.ticketUrl))?e.ticketUrl:url; // pasted/specific page wins over venue homepages
-      return{...e,ticketUrl:tu,source:label};
+      return{...e,ticketUrl:tu,source:site};
     });
     const n=mergeLive(evs);
-    if(n){state.lastUpdated=Date.now();ensureSelections();await saveState();renderSidebar();renderMain();updateHero();toast(`Added ${n} event${n!==1?"s":""} from ${label.replace("From ","")}`,"ok");$("#srcInput").value="";}
+    if(n){state.lastUpdated=Date.now();ensureSelections();ensureSourceSelections();await saveState();renderSidebar();renderMain();updateHero();toast(`Added ${n} event${n!==1?"s":""} from ${site}`,"ok");$("#srcInput").value="";}
     else toast("No new events found there — it'll be included on future refreshes.");
   }catch(err){
     toast(/^API /.test(err.message)?err.message.replace(/^API /,"Live error: "):"Couldn't read that page — live web search needs the backend or in-Claude version.","err");
@@ -1097,7 +1129,7 @@ function updateHero(){
   const evs=displayEvents();
   const venues=new Set(evs.map(e=>vkey(e.cat,e.venue)));
   $("#heroStats").innerHTML=`<span><b>${evs.length}</b> events</span><span><b>${venues.size||CURATED.length}</b> venues</span><span><b>4</b> categories</span>${hasLive()?`<span style="color:var(--green)"><b>● Live</b></span>`:""}`;
-  $("#footNote").textContent=hasBroadLive()?`Showing live data · ${evs.length} de-duplicated events`:(hasLive()?`Sample data + ${state.liveEvents.length} live addition${state.liveEvents.length!==1?"s":""} · Refresh for full live coverage`:"Showing sample data — add a Ticketmaster key in settings for live events");
+  $("#footNote").textContent=hasLive()?`Showing live data · ${evs.length} de-duplicated event${evs.length!==1?"s":""}`:(state.loading?"Loading live events…":"No live events loaded yet — tap ↻ to pull from Ticketmaster, then refresh for venue websites");
 }
 function applyTheme(){
   const t=state.theme;
@@ -1178,7 +1210,7 @@ const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.t
 
 /* ---- init ---- */
 (async function(){
-  state.events=buildSamples();
+  state.events=[]; // no sample data — events come only from live sources
   await loadState();
   applyTheme();
   if(window.matchMedia)window.matchMedia("(prefers-color-scheme:dark)").addEventListener("change",applyTheme);
