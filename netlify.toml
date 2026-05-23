@@ -1,0 +1,12 @@
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Serve the app at the site root (the page file is index-1.html).
+[[redirects]]
+  from = "/"
+  to = "/index-1.html"
+  status = 200
