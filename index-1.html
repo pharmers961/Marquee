@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marquee — Everything happening in New York</title>
+<style>
+  :root{
+    --bg:#f5f5f7;
+    --surface:#ffffff;
+    --text:#1d1d1f;
+    --text-2:#6e6e73;
+    --text-3:#86868b;
+    --line:#d2d2d7;
+    --line-soft:#e8e8ed;
+    --blue:#0071e3;
+    --blue-h:#0077ed;
+    --link:#0066cc;
+    --green:#00a17a;
+    --red:#ff3b30;
+    --c-classical:#5e5ce6;
+    --c-broadway:#00a17a;
+    --c-concerts:#0071e3;
+    --c-sports:#ff9f0a;
+    --nav-h:48px;
+    --tb-h:60px;
+    --r:18px;
+    --shadow:0 4px 24px rgba(0,0,0,.06);
+    --shadow-lg:0 30px 60px -12px rgba(0,0,0,.25);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);color:var(--text);background:var(--bg);
+    -webkit-font-smoothing:antialiased;line-height:1.47;
+    letter-spacing:-.01em;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit}
+  a{color:inherit;text-decoration:none}
+
+  /* ---------- Nav ---------- */
+  nav{position:sticky;top:0;z-index:50;height:var(--nav-h);
+    background:rgba(245,245,247,.78);backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.07)}
+  .nav-in{max-width:1180px;margin:0 auto;height:100%;padding:0 22px;display:flex;align-items:center;gap:14px}
+  .wordmark{font-size:20px;font-weight:600;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+  .wordmark .glyph{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#0071e3,#00a17a);display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700}
+  .nav-grow{flex:1}
+  .nav-btn{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--text);transition:.18s}
+  .nav-btn:hover{background:rgba(0,0,0,.05)}
+  .pill{background:var(--blue);color:#fff;border-radius:980px;padding:7px 16px;font-size:14px;font-weight:500;transition:.18s;display:inline-flex;align-items:center;gap:6px}
+  .pill:hover{background:var(--blue-h)}
+  .pill.ghost{background:rgba(0,0,0,.05);color:var(--text)}
+  .pill.ghost:hover{background:rgba(0,0,0,.09)}
+  .pill:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ---------- Hero ---------- */
+  .hero{text-align:center;padding:74px 22px 30px;max-width:1180px;margin:0 auto}
+  .hero .eyebrow{color:var(--green);font-size:19px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+  .hero h1{font-size:clamp(40px,7vw,76px);font-weight:600;letter-spacing:-.025em;line-height:1.04}
+  .hero .sub{font-size:clamp(19px,2.4vw,26px);color:var(--text-2);font-weight:400;margin-top:14px;max-width:660px;margin-left:auto;margin-right:auto}
+  .hero .stats{margin-top:22px;color:var(--text-3);font-size:15px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap}
+  .hero .stats b{color:var(--text);font-weight:600}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{position:sticky;top:var(--nav-h);z-index:40;
+    background:rgba(245,245,247,.82);backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.06)}
+  .tb-in{max-width:1180px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .chips{display:flex;gap:8px;overflow-x:auto;flex:1;scrollbar-width:none;-ms-overflow-style:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip-f{white-space:nowrap;padding:7px 15px;border-radius:980px;font-size:14px;font-weight:500;
+    background:var(--surface);border:1px solid var(--line);color:var(--text);transition:.16s}
+  .chip-f:hover{border-color:var(--text-3)}
+  .chip-f.on{background:var(--text);color:#fff;border-color:var(--text)}
+  .chip-f.save.on{background:var(--red);border-color:var(--red)}
+  .seg{display:inline-flex;background:rgba(120,120,128,.12);border-radius:10px;padding:2px}
+  .seg button{padding:7px 15px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px;transition:.18s}
+  .seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.14);font-weight:600}
+  .search{position:relative;flex:1 1 220px;min-width:160px;max-width:320px}
+  .search input{width:100%;padding:8px 12px 8px 34px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface);font-size:14px;transition:.16s}
+  .search input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,113,227,.12)}
+  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-3)}
+
+  /* ---------- App grid ---------- */
+  .shell{max-width:1180px;margin:0 auto;padding:30px 22px 90px;display:grid;grid-template-columns:264px 1fr;gap:26px;align-items:start}
+
+  /* Sidebar */
+  .side{background:var(--surface);border-radius:var(--r);padding:8px;box-shadow:var(--shadow);position:sticky;top:calc(var(--nav-h) + var(--tb-h) + 16px)}
+  .side-top{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 8px}
+  .side-top h2{font-size:15px;font-weight:600}
+  .side-top .x{font-size:13px;color:var(--link);font-weight:500}
+  .side .meta{padding:0 12px 8px;font-size:12.5px;color:var(--text-3)}
+  .cat{margin:4px}
+  .cat-head{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;cursor:pointer;user-select:none;transition:.14s}
+  .cat-head:hover{background:var(--bg)}
+  .cat-head .emoji{font-size:16px}
+  .cat-head .name{font-weight:600;font-size:14px;flex:1}
+  .cat-head .n{font-size:11px;color:var(--text-3);font-weight:600}
+  .chev{transition:.2s;color:var(--text-3)}
+  .cat.collapsed .chev{transform:rotate(-90deg)}
+  .cat.collapsed .venues{display:none}
+  .venues{padding:2px 4px 6px}
+  .ven{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:9px;cursor:pointer;transition:.12s}
+  .ven:hover{background:var(--bg)}
+  .ck{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--line);flex:0 0 auto;display:grid;place-items:center;transition:.14s}
+  .ven.sel .ck{background:var(--accent);border-color:var(--accent)}
+  .ck svg{opacity:0;transform:scale(.4);transition:.14s;color:#fff}
+  .ven.sel .ck svg{opacity:1;transform:scale(1)}
+  .ven .vtext{flex:1;min-width:0}
+  .ven .vn{font-size:13px;font-weight:500;line-height:1.2;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ven .vc{font-size:11px;color:var(--text-3)}
+  .swatch{width:14px;height:14px;border-radius:50%;background:var(--accent);flex:0 0 auto;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);transition:.14s}
+  .swatch:hover{transform:scale(1.18)}
+  .side-actions{display:flex;gap:6px;padding:6px 8px 10px}
+  .side-actions button{flex:1;font-size:12.5px;padding:7px;border-radius:9px;background:var(--bg);font-weight:500;color:var(--text-2);transition:.14s}
+  .side-actions button:hover{color:var(--blue)}
+
+  /* palette popover */
+  .palette{position:fixed;z-index:90;background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-lg);padding:10px;display:none;grid-template-columns:repeat(5,1fr);gap:8px;width:184px}
+  .palette.show{display:grid}
+  .palette button{width:24px;height:24px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+  .palette button:hover{transform:scale(1.12)}
+  .palette .reset{grid-column:1/-1;width:auto;height:auto;border-radius:8px;background:var(--bg);font-size:12px;font-weight:600;color:var(--text-2);padding:6px;box-shadow:none}
+
+  /* Main header */
+  .main-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+  .main-top h2{font-size:28px;font-weight:600;letter-spacing:-.02em}
+  .main-top .cnt{color:var(--text-3);font-size:14px;margin-top:2px}
+  .updated{font-size:12.5px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+  .ld{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+  /* List */
+  .list{display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--surface);border-radius:var(--r);overflow:hidden;display:flex;cursor:pointer;
+    box-shadow:var(--shadow);transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s;
+    position:relative;animation:rise .55s cubic-bezier(.16,1,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .card .stripe{width:5px;background:var(--accent);flex:0 0 auto}
+  .date-col{flex:0 0 82px;padding:16px 6px;text-align:center;display:flex;flex-direction:column;justify-content:center;border-right:1px solid var(--line-soft)}
+  .date-col .mon{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+  .date-col .day{font-size:28px;font-weight:600;line-height:1.05;margin:1px 0}
+  .date-col .dow{font-size:11px;color:var(--text-3)}
+  .card .body{flex:1;padding:15px 16px;min-width:0}
+  .card .tag{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .card .ttl{font-size:18px;font-weight:600;letter-spacing:-.015em;line-height:1.2;margin-bottom:3px;padding-right:30px}
+  .card .sub{font-size:13px;color:var(--text-2);display:flex;flex-wrap:wrap;gap:4px 14px}
+  .card .sub b{color:var(--text);font-weight:500}
+  .card .price{font-size:13px;font-weight:600;color:var(--green);margin-top:6px}
+  .fav{position:absolute;top:13px;right:14px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--text-3);transition:.16s;z-index:2}
+  .fav:hover{background:var(--bg);color:var(--red)}
+  .fav.on{color:var(--red)}
+  .fav.on svg{fill:var(--red)}
+
+  /* Calendar */
+  .cal-nav{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .cal-nav h3{font-size:21px;font-weight:600;min-width:170px}
+  .cal-nav button{width:34px;height:34px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--text);transition:.14s}
+  .cal-nav button:hover{color:var(--blue)}
+  .cal-nav .tbtn{width:auto;padding:0 14px;font-size:13px;font-weight:500}
+  .cal{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+  .dow-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line-soft)}
+  .dow-row span{padding:10px 6px;text-align:center;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3)}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .cell{min-height:106px;border-right:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:6px}
+  .cell:nth-child(7n){border-right:none}
+  .cell.out{background:#fafafc}
+  .cell .num{font-size:12.5px;font-weight:500;color:var(--text-2);width:23px;height:23px;display:grid;place-items:center;border-radius:50%}
+  .cell.out .num{color:var(--text-3)}
+  .cell.today .num{background:var(--blue);color:#fff;font-weight:600}
+  .chip{font-size:11px;padding:3px 7px;border-radius:6px;margin-top:4px;cursor:pointer;font-weight:500;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--chipbg);color:var(--accent);transition:.12s}
+  .chip:hover{filter:brightness(.96)}
+  .chip .h{color:var(--red)}
+  .more{font-size:10.5px;color:var(--text-3);margin-top:3px;font-weight:500;cursor:pointer;padding-left:3px}
+
+  .empty{text-align:center;padding:80px 20px;color:var(--text-2)}
+  .empty .big{font-size:50px;margin-bottom:12px}
+  .empty h3{font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px}
+
+  /* Modal */
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+  .scrim.show{display:flex;animation:fade .2s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--surface);border-radius:24px;max-width:500px;width:100%;box-shadow:var(--shadow-lg);
+    overflow:hidden;max-height:90vh;overflow-y:auto;animation:pop .3s cubic-bezier(.16,1,.3,1)}
+  @keyframes pop{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+  .modal .top{padding:26px 28px 22px;position:relative;border-bottom:1px solid var(--line-soft)}
+  .modal .top::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent)}
+  .modal .tag{font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .modal h2{font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.15;padding-right:36px}
+  .modal .close{position:absolute;top:20px;right:20px;width:30px;height:30px;border-radius:50%;background:var(--bg);display:grid;place-items:center;color:var(--text-2)}
+  .modal .close:hover{color:var(--text)}
+  .info{padding:20px 28px;display:flex;flex-direction:column;gap:14px}
+  .row{display:flex;gap:13px;align-items:flex-start}
+  .row .ic{font-size:19px;width:24px;text-align:center;flex:0 0 auto}
+  .row .lab{font-size:11px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  .row .val{font-size:15px;font-weight:500}
+  .desc{font-size:14px;color:var(--text-2);line-height:1.5}
+  .src-tag{font-size:11.5px;color:var(--text-3)}
+  .actions{padding:4px 28px 28px;display:flex;flex-direction:column;gap:10px}
+  .actions .three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .abtn{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:12px;font-size:14px;font-weight:500;transition:.16s}
+  .abtn.primary{background:var(--blue);color:#fff}
+  .abtn.primary:hover{background:var(--blue-h)}
+  .abtn.sec{background:var(--bg);color:var(--text)}
+  .abtn.sec:hover{background:#ececf0}
+  .abtn.sec.on{background:var(--red);color:#fff}
+  .abtn.sec.on svg{fill:#fff}
+
+  /* dropdown */
+  .ddwrap{position:relative}
+  .dd{position:absolute;right:0;top:calc(100% + 10px);width:336px;background:var(--surface);border-radius:18px;
+    box-shadow:var(--shadow-lg);padding:18px;z-index:60;display:none}
+  .dd.show{display:block;animation:fade .16s}
+  .dd h3{font-size:17px;font-weight:600;margin-bottom:3px}
+  .dd p{font-size:12.5px;color:var(--text-2);margin-bottom:13px;line-height:1.4}
+  .dd .field{display:flex;gap:8px}
+  .dd input{flex:1;padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-size:14px}
+  .dd input:focus{outline:none;border-color:var(--blue)}
+  .src-list{margin-top:14px;display:flex;flex-direction:column;gap:6px;max-height:170px;overflow:auto}
+  .src-h{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-3)}
+  .src-item{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:7px 10px;background:var(--bg);border-radius:10px}
+  .src-item .u{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-2)}
+  .src-item button{color:var(--text-3);font-size:15px}
+  .src-item button:hover{color:var(--red)}
+
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+  .pill.ghost .spinner{border-color:rgba(0,0,0,.2);border-top-color:var(--text)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(29,29,31,.95);
+    color:#fff;padding:13px 22px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);
+    z-index:95;opacity:0;transition:.3s;pointer-events:none;backdrop-filter:blur(10px)}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  footer{text-align:center;padding:30px 22px 50px;color:var(--text-3);font-size:12px;border-top:1px solid var(--line-soft);max-width:1180px;margin:0 auto}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  .filter-fab{display:none}
+  @media (max-width:880px){
+    .shell{grid-template-columns:1fr;padding:22px 16px 90px}
+    .side{position:fixed;inset:0;z-index:85;border-radius:0;overflow-y:auto;transform:translateX(-100%);transition:.28s;top:0;box-shadow:none}
+    .side.open{transform:none}
+    .filter-fab{display:inline-flex;align-items:center;gap:8px;position:fixed;bottom:22px;right:18px;z-index:60;
+      padding:13px 20px;border-radius:980px;background:var(--blue);color:#fff;font-weight:500;font-size:15px;box-shadow:var(--shadow-lg)}
+    .cell{min-height:74px}
+    .chip{font-size:9.5px}
+    .main-top h2{font-size:23px}
+    .actions .three{grid-template-columns:1fr}
+    .hero{padding:48px 18px 24px}
+  }
+  @media (min-width:881px){ .side-top .x{display:none} }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <div class="wordmark"><span class="glyph">M</span> Marquee</div>
+    <div class="nav-grow"></div>
+    <button class="nav-btn" id="refreshBtn" title="Refresh live events">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+    </button>
+    <div class="ddwrap">
+      <button class="pill" id="addBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add source
+      </button>
+      <div class="dd" id="sourceDD">
+        <h3>Pull events from a website</h3>
+        <p>Paste a venue or listings URL. Marquee searches the web and adds upcoming events it finds — automatically de-duplicated against everything you already have.</p>
+        <div class="field">
+          <input id="srcInput" type="text" placeholder="carnegiehall.org/Events">
+          <button class="pill" id="srcGo">Fetch</button>
+        </div>
+        <div class="src-list" id="srcList"></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="eyebrow reveal">Marquee 2.0</div>
+  <h1 class="reveal">Everything happening<br>in New York.</h1>
+  <p class="sub reveal">Symphony to slam dunks. Browse it all in one place, filter by venue, and save what you love to your calendar.</p>
+  <div class="stats reveal" id="heroStats"></div>
+</section>
+
+<div class="toolbar">
+  <div class="tb-in">
+    <div class="chips" id="dateChips">
+      <button class="chip-f on" data-d="all">All upcoming</button>
+      <button class="chip-f" data-d="today">Today</button>
+      <button class="chip-f" data-d="weekend">This weekend</button>
+      <button class="chip-f" data-d="week">This week</button>
+      <button class="chip-f" data-d="month">This month</button>
+      <button class="chip-f save" id="savedChip">♥ Saved</button>
+    </div>
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="text" placeholder="Search artist, team, show…" autocomplete="off">
+    </div>
+    <div class="seg" id="viewToggle">
+      <button data-view="list" class="on">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List
+      </button>
+      <button data-view="calendar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Calendar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="side-top">
+      <h2>Venues</h2>
+      <button class="x" id="sideX">Done</button>
+    </div>
+    <div class="meta" id="venMeta"></div>
+    <div class="side-actions">
+      <button id="selAll">Select all</button>
+      <button id="selNone">Clear all</button>
+    </div>
+    <div id="catList"></div>
+  </aside>
+
+  <main>
+    <div class="main-top">
+      <div>
+        <h2 id="mainTitle">Upcoming events</h2>
+        <div class="cnt" id="mainCount"></div>
+      </div>
+      <div class="updated" id="updated"></div>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<footer>Marquee 2.0 · Sample data shown until you refresh live · Calendar export works with Apple Calendar, Google Calendar &amp; Outlook</footer>
+
+<button class="filter-fab" id="filterFab">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+  Venues
+</button>
+
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div class="palette" id="palette"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================== MARQUEE v2.0 ====================== */
+
+const CATEGORIES = {
+  classical:{label:"Classical & Opera",emoji:"🎻",color:"#5e5ce6"},
+  broadway:{label:"Broadway & Theater",emoji:"🎭",color:"#00a17a"},
+  concerts:{label:"Concerts",emoji:"🎤",color:"#0071e3"},
+  sports:{label:"Sports",emoji:"🏟️",color:"#ff9f0a"},
+};
+const VENUES = [
+  {name:"New York Philharmonic",cat:"classical",area:"David Geffen Hall",url:"https://www.nyphil.org/concerts-tickets/calendar"},
+  {name:"Metropolitan Opera",cat:"classical",area:"Lincoln Center",url:"https://www.metopera.org/season/2025-26-season/"},
+  {name:"Carnegie Hall",cat:"classical",area:"57th & 7th",url:"https://www.carnegiehall.org/Events"},
+  {name:"Broadway",cat:"broadway",area:"Theater District",url:"https://www.broadway.org/shows"},
+  {name:"Lincoln Center Theater",cat:"broadway",area:"Lincoln Center",url:"https://www.lct.org/shows/"},
+  {name:"Madison Square Garden",cat:"concerts",area:"Midtown",url:"https://www.msg.com/calendar/madison-square-garden"},
+  {name:"Barclays Center",cat:"concerts",area:"Brooklyn",url:"https://www.barclayscenter.com/events"},
+  {name:"Radio City Music Hall",cat:"concerts",area:"Rockefeller Center",url:"https://www.msg.com/calendar/radio-city-music-hall"},
+  {name:"Brooklyn Steel",cat:"concerts",area:"E. Williamsburg",url:"https://www.bowerypresents.com/brooklyn-steel/shows/"},
+  {name:"Madison Square Garden",cat:"sports",area:"Knicks & Rangers",url:"https://www.msg.com/madison-square-garden"},
+  {name:"Yankee Stadium",cat:"sports",area:"Bronx — Yankees",url:"https://www.mlb.com/yankees/tickets"},
+  {name:"Citi Field",cat:"sports",area:"Queens — Mets",url:"https://www.mlb.com/mets/tickets"},
+  {name:"Barclays Center",cat:"sports",area:"Brooklyn — Nets",url:"https://www.barclayscenter.com/brooklyn-nets"},
+];
+const vkey=(c,n)=>c+"|"+n;
+const SWATCHES=["#0071e3","#5e5ce6","#00a17a","#34c759","#30b0c7","#ff9f0a","#ff3b30","#ff2d55","#bf5af2","#8e8e93"];
+
+function buildSamples(){
+  const T=[
+    [2,19,30,2.5,"classical","New York Philharmonic","Beethoven Symphony No. 9","cond. Gustavo Dudamel","$45–185","The complete Ninth with the Westminster Symphonic Choir — Beethoven's towering 'Ode to Joy.'"],
+    [9,19,30,2,"classical","New York Philharmonic","Mahler: Symphony No. 5","New York Philharmonic","$40–160","Mahler's monumental Fifth, anchored by the famous Adagietto."],
+    [4,19,30,3,"classical","Metropolitan Opera","La Bohème","Puccini","$33–298","Zeffirelli's beloved production of Puccini's heartbreaking love story."],
+    [12,19,0,3,"classical","Metropolitan Opera","Carmen","Bizet","$33–298","Bizet's fiery, passionate masterpiece returns to the Met stage."],
+    [6,20,0,2,"classical","Carnegie Hall","Yo-Yo Ma plays Bach","Yo-Yo Ma","$50–220","The legendary cellist performs the complete Bach Cello Suites."],
+    [18,20,0,2,"classical","Carnegie Hall","Vienna Philharmonic","Vienna Philharmonic","$70–340","One of the world's great orchestras on tour."],
+    [1,19,0,2.75,"broadway","Broadway","Hamilton","Richard Rodgers Theatre","$199–699","Lin-Manuel Miranda's revolutionary musical about Alexander Hamilton."],
+    [3,19,0,2.5,"broadway","Broadway","The Lion King","Minskoff Theatre","$129–399","Disney's Tony-winning spectacle, now in its third decade."],
+    [7,20,0,2.75,"broadway","Broadway","Wicked","Gershwin Theatre","$149–499","The untold story of the witches of Oz."],
+    [11,19,0,2.5,"broadway","Broadway","MJ the Musical","Neil Simon Theatre","$99–349","The electrifying musical built around Michael Jackson's artistry."],
+    [15,19,30,2.25,"broadway","Lincoln Center Theater","The Skin of Our Teeth","Vivian Beaumont","$77–177","Thornton Wilder's wild Pulitzer-winning comedy of survival."],
+    [2,20,0,2.5,"concerts","Madison Square Garden","Billie Eilish — Hit Me Hard Tour","Billie Eilish","$95–450","The Grammy-winning artist brings her arena spectacle to MSG."],
+    [8,20,0,2.5,"concerts","Madison Square Garden","The Weeknd","The Weeknd","$120–600","After Hours til Dawn — a stadium-scale production."],
+    [5,20,0,2,"concerts","Barclays Center","SZA — Lana Tour","SZA","$85–380","The SOS superstar live in Brooklyn."],
+    [13,20,0,2,"concerts","Radio City Music Hall","Hozier","Hozier","$75–250","An intimate evening at the iconic Radio City."],
+    [10,20,0,2,"concerts","Brooklyn Steel","Vampire Weekend","Vampire Weekend","$65","Indie favorites in a packed Williamsburg warehouse."],
+    [20,20,0,2.5,"concerts","Barclays Center","Bad Bunny","Bad Bunny","$110–520","Un Verano Sin Ti — the global phenomenon live."],
+    [1,19,30,2.5,"sports","Madison Square Garden","Knicks vs. Boston Celtics","New York Knicks","$60–900","Atlantic Division rivalry night at the Garden."],
+    [6,19,0,2.5,"sports","Madison Square Garden","Rangers vs. Boston Bruins","New York Rangers","$55–650","Original Six hockey under the lights."],
+    [3,13,5,3,"sports","Yankee Stadium","Yankees vs. Red Sox","New York Yankees","$25–400","Baseball's greatest rivalry in the Bronx."],
+    [9,18,40,3,"sports","Citi Field","Mets vs. Atlanta Braves","New York Mets","$22–300","NL East showdown in Flushing."],
+    [14,19,30,2.5,"sports","Barclays Center","Nets vs. Milwaukee Bucks","Brooklyn Nets","$45–520","Brooklyn hosts the Bucks in a marquee matchup."],
+  ];
+  const now=new Date();
+  return T.map((r,i)=>{
+    const[off,h,m,dur,cat,venue,title,artist,price,desc]=r;
+    const s=new Date(now);s.setDate(now.getDate()+off);s.setHours(h,m,0,0);
+    const e=new Date(s.getTime()+dur*3600*1000);
+    const v=VENUES.find(x=>x.name===venue&&x.cat===cat)||VENUES.find(x=>x.name===venue);
+    return{id:"s"+i,title,artist,venue,cat,price,start:s.toISOString(),end:e.toISOString(),desc,ticketUrl:v?v.url:"#",source:"Sample data"};
+  });
+}
+
+const DEFAULT_SOURCES=["https://www.nyc.gov/main/events/","https://www.timeout.com/newyork","https://www.carnegiehall.org/Events","https://www.wnyc.org/events"];
+let state={
+  view:"list",query:"",dateFilter:"all",savedOnly:false,
+  selected:new Set(VENUES.map(v=>vkey(v.cat,v.name))),
+  saved:new Set(),venueColors:{},
+  events:[],liveEvents:[],sources:[...DEFAULT_SOURCES],
+  calMonth:new Date().getMonth(),calYear:new Date().getFullYear(),lastUpdated:null,
+};
+
+/* ---- storage ---- */
+async function saveState(){
+  try{await window.storage.set("marquee2:prefs",JSON.stringify({
+    view:state.view,dateFilter:state.dateFilter,savedOnly:state.savedOnly,
+    selected:[...state.selected],saved:[...state.saved],venueColors:state.venueColors,
+    sources:state.sources,liveEvents:state.liveEvents,lastUpdated:state.lastUpdated,
+  }),false);}catch(e){}
+}
+async function loadState(){
+  try{
+    const r=await window.storage.get("marquee2:prefs",false);
+    if(r&&r.value){
+      const p=JSON.parse(r.value);
+      if(p.view)state.view=p.view;
+      if(p.dateFilter)state.dateFilter=p.dateFilter;
+      if(typeof p.savedOnly==="boolean")state.savedOnly=p.savedOnly;
+      if(Array.isArray(p.selected)&&p.selected.length)state.selected=new Set(p.selected);
+      if(Array.isArray(p.saved))state.saved=new Set(p.saved);
+      if(p.venueColors)state.venueColors=p.venueColors;
+      if(Array.isArray(p.sources))state.sources=p.sources;
+      if(Array.isArray(p.liveEvents))state.liveEvents=p.liveEvents;
+      if(p.lastUpdated)state.lastUpdated=p.lastUpdated;
+    }
+  }catch(e){}
+}
+
+/* ---- helpers ---- */
+const $=s=>document.querySelector(s);
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONF=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const allEvents=()=>[...state.events,...state.liveEvents];
+function venueColor(e){return state.venueColors[vkey(e.cat,e.venue)]||CATEGORIES[e.cat].color;}
+function rgba(hex,a){const h=hex.replace("#","");const n=parseInt(h.length===3?h.split("").map(x=>x+x).join(""):h,16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
+function timeStr(iso){const d=new Date(iso);let h=d.getHours(),m=d.getMinutes();const ap=h>=12?"PM":"AM";h=h%12||12;return h+(m?":"+String(m).padStart(2,"0"):"")+" "+ap;}
+function esc(s){return(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
+
+/* Resolve a Buy-tickets link to the SPECIFIC event, not a venue homepage. */
+function monthYear(iso){return new Date(iso).toLocaleDateString([],{month:"long",year:"numeric"});}
+function ticketLink(e){
+  const q=encodeURIComponent;
+  // 1) Trust a genuinely event-specific URL (e.g. from live data: at least 2 path segments deep).
+  if(e.ticketUrl&&e.ticketUrl!=="#"){
+    try{const u=new URL(e.ticketUrl);
+      if(u.pathname.replace(/\/+$/,"").split("/").filter(Boolean).length>=2)
+        return{url:e.ticketUrl,via:u.hostname.replace(/^www\./,"")};
+    }catch(_){}
+  }
+  // 2) Ticketmaster-covered arenas → search the exact artist/team.
+  const tm=["Madison Square Garden","Barclays Center","Radio City Music Hall"];
+  if(tm.includes(e.venue)&&(e.cat==="concerts"||e.cat==="sports"))
+    return{url:"https://www.ticketmaster.com/search?q="+q(e.artist||e.title),via:"Ticketmaster"};
+  // 3) Everyone else (opera, Broadway, baseball, classical) → precise official ticket search.
+  return{url:"https://www.google.com/search?q="+q(e.title+" "+e.venue+" tickets "+monthYear(e.start)),via:"official ticket search"};
+}
+
+/* aggressive dedupe key */
+function dedupeKey(e){
+  let t=(e.title||"").toLowerCase()
+    .replace(/[^a-z0-9 ]/g," ")
+    .replace(/\b(the|a|an|tour|live|concert|presents?|featuring|feat|with|vs|versus|at|in|nyc|new york)\b/g," ")
+    .replace(/\s+/g," ").trim().slice(0,26);
+  return t+"|"+(e.start||"").slice(0,10);
+}
+
+/* date filter */
+function inDateRange(e){
+  const f=state.dateFilter; if(f==="all")return true;
+  const d=new Date(e.start), now=new Date(), today=new Date(now); today.setHours(0,0,0,0);
+  const t0=today.getTime();
+  if(d.getTime()<t0)return false;
+  if(f==="today")return d.getTime()<t0+86400000;
+  if(f==="week")return d.getTime()<t0+7*86400000;
+  if(f==="month")return d.getTime()<t0+31*86400000;
+  if(f==="weekend"){
+    let dow=today.getDay(),toSat=(6-dow+7)%7; if(dow===0)toSat=-1;
+    const sat=new Date(today);sat.setDate(today.getDate()+toSat);
+    return d.getTime()>=sat.getTime()&&d.getTime()<sat.getTime()+2*86400000;
+  }
+  return true;
+}
+function filtered(){
+  const q=state.query.trim().toLowerCase();
+  return allEvents().filter(e=>{
+    if(state.savedOnly&&!state.saved.has(e.id))return false;
+    if(!state.selected.has(vkey(e.cat,e.venue)))return false;
+    if(!inDateRange(e))return false;
+    if(q){const hay=(e.title+" "+(e.artist||"")+" "+e.venue+" "+CATEGORIES[e.cat].label).toLowerCase();if(!hay.includes(q))return false;}
+    return true;
+  }).sort((a,b)=>new Date(a.start)-new Date(b.start));
+}
+
+/* ---- sidebar ---- */
+function renderSidebar(){
+  const host=$("#catList");host.innerHTML="";
+  Object.entries(CATEGORIES).forEach(([cat,meta])=>{
+    const vens=VENUES.filter(v=>v.cat===cat);if(!vens.length)return;
+    const wrap=document.createElement("div");wrap.className="cat";
+    const sc=vens.filter(v=>state.selected.has(vkey(cat,v.name))).length;
+    wrap.innerHTML=`<div class="cat-head"><span class="emoji">${meta.emoji}</span><span class="name">${meta.label}</span><span class="n">${sc}/${vens.length}</span><svg class="chev" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div><div class="venues"></div>`;
+    const vbox=wrap.querySelector(".venues");
+    vens.forEach(v=>{
+      const k=vkey(cat,v.name),sel=state.selected.has(k),col=state.venueColors[k]||meta.color;
+      const row=document.createElement("div");row.className="ven"+(sel?" sel":"");row.style.setProperty("--accent",col);
+      row.innerHTML=`<span class="ck"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"/></svg></span><span class="vtext"><span class="vn">${v.name}</span><span class="vc">${v.area}</span></span><button class="swatch" title="Change color"></button>`;
+      row.addEventListener("click",ev=>{
+        if(ev.target.closest(".swatch")){ev.stopPropagation();openPalette(k,ev.target);return;}
+        state.selected.has(k)?state.selected.delete(k):state.selected.add(k);
+        saveState();renderSidebar();renderMain();
+      });
+      vbox.appendChild(row);
+    });
+    wrap.querySelector(".cat-head").addEventListener("click",()=>wrap.classList.toggle("collapsed"));
+    host.appendChild(wrap);
+  });
+  const total=VENUES.length,on=state.selected.size;
+  $("#venMeta").textContent=on===total?`All ${total} venues shown`:`${on} of ${total} venues selected`;
+}
+
+function openPalette(key,anchor){
+  const pal=$("#palette");
+  pal.innerHTML=SWATCHES.map(c=>`<button data-c="${c}" style="background:${c}"></button>`).join("")+`<button class="reset" data-c="reset">Reset to default</button>`;
+  const r=anchor.getBoundingClientRect();
+  pal.style.left=Math.min(r.left-80,window.innerWidth-200)+"px";
+  pal.style.top=(r.bottom+8)+"px";
+  pal.classList.add("show");
+  pal.querySelectorAll("button").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    if(b.dataset.c==="reset")delete state.venueColors[key];else state.venueColors[key]=b.dataset.c;
+    saveState();pal.classList.remove("show");renderSidebar();renderMain();
+  });
+}
+document.addEventListener("click",e=>{if(!e.target.closest(".palette")&&!e.target.closest(".swatch"))$("#palette").classList.remove("show");});
+
+/* ---- main ---- */
+function renderMain(){
+  const evs=filtered();
+  let label=state.savedOnly?"Saved events":({all:"Upcoming events",today:"Today",weekend:"This weekend",week:"This week",month:"This month"}[state.dateFilter]||"Events");
+  $("#mainTitle").textContent=state.view==="calendar"?"Calendar":label;
+  $("#mainCount").textContent=evs.length+" event"+(evs.length!==1?"s":"")+(state.query?` matching “${state.query}”`:"");
+  const up=$("#updated");
+  up.innerHTML=state.lastUpdated
+    ?`<span class="ld"></span> Live · updated ${new Date(state.lastUpdated).toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}`
+    :`<span class="ld"></span> Sample data`;
+  state.view==="list"?renderList(evs):renderCalendar(evs);
+}
+
+function renderList(evs){
+  const c=$("#content");
+  if(!evs.length){c.innerHTML=emptyHTML();return;}
+  c.innerHTML=`<div class="list"></div>`;const list=c.querySelector(".list");
+  evs.forEach((e,i)=>{
+    const meta=CATEGORIES[e.cat],col=venueColor(e),d=new Date(e.start),fav=state.saved.has(e.id);
+    const card=document.createElement("div");card.className="card";card.style.setProperty("--accent",col);card.style.animationDelay=(Math.min(i,14)*.03)+"s";
+    card.innerHTML=`<div class="stripe"></div>
+      <div class="date-col"><div class="mon">${MON[d.getMonth()]}</div><div class="day">${d.getDate()}</div><div class="dow">${DOW[d.getDay()]}</div></div>
+      <div class="body">
+        <button class="fav${fav?" on":""}" title="Save"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
+        <div class="tag">${meta.emoji} ${meta.label}</div>
+        <div class="ttl">${esc(e.title)}</div>
+        <div class="sub"><span>🕘 <b>${timeStr(e.start)}</b></span><span>📍 ${esc(e.venue)}</span>${e.artist?`<span>★ ${esc(e.artist)}</span>`:""}</div>
+        ${e.price?`<div class="price">${esc(e.price)}</div>`:""}
+      </div>`;
+    card.querySelector(".fav").addEventListener("click",ev=>{ev.stopPropagation();toggleSave(e.id);});
+    card.addEventListener("click",()=>openModal(e));
+    list.appendChild(card);
+  });
+}
+
+function renderCalendar(evs){
+  const c=$("#content"),y=state.calYear,m=state.calMonth;
+  const startDow=new Date(y,m,1).getDay(),daysIn=new Date(y,m+1,0).getDate();
+  const today=new Date();today.setHours(0,0,0,0);
+  const byDay={};evs.forEach(e=>{const d=new Date(e.start);(byDay[y+"-"+m+"-"+d.getDate()]=byDay[y+"-"+m+"-"+d.getDate()]||[]);
+    if(d.getFullYear()===y&&d.getMonth()===m)byDay[y+"-"+m+"-"+d.getDate()].push(e);});
+  let cells="";const prevDays=new Date(y,m,0).getDate();
+  for(let i=startDow-1;i>=0;i--)cells+=`<div class="cell out"><div class="num">${prevDays-i}</div></div>`;
+  for(let day=1;day<=daysIn;day++){
+    const dt=new Date(y,m,day),k=y+"-"+m+"-"+day,isToday=dt.getTime()===today.getTime();
+    const arr=(byDay[k]||[]).sort((a,b)=>new Date(a.start)-new Date(b.start));
+    let chips="";
+    arr.slice(0,3).forEach(e=>{const col=venueColor(e),fav=state.saved.has(e.id);
+      chips+=`<div class="chip" data-id="${e.id}" style="--accent:${col};--chipbg:${rgba(col,.13)}">${fav?'<span class="h">♥ </span>':""}${timeStr(e.start).replace(":00","")} ${esc(e.title)}</div>`;});
+    if(arr.length>3)chips+=`<div class="more">+${arr.length-3} more</div>`;
+    cells+=`<div class="cell${isToday?" today":""}"><div class="num">${day}</div>${chips}</div>`;
+  }
+  const trail=(7-((startDow+daysIn)%7))%7;
+  for(let i=1;i<=trail;i++)cells+=`<div class="cell out"><div class="num">${i}</div></div>`;
+  c.innerHTML=`<div class="cal-nav">
+      <button id="prevM"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h3>${MONF[m]} ${y}</h3>
+      <button id="nextM"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+      <button class="tbtn" id="todayM">Today</button></div>
+    <div class="cal"><div class="dow-row">${DOW.map(d=>`<span>${d}</span>`).join("")}</div><div class="grid">${cells}</div></div>`;
+  $("#prevM").onclick=()=>{if(--state.calMonth<0){state.calMonth=11;state.calYear--;}renderMain();};
+  $("#nextM").onclick=()=>{if(++state.calMonth>11){state.calMonth=0;state.calYear++;}renderMain();};
+  $("#todayM").onclick=()=>{const n=new Date();state.calMonth=n.getMonth();state.calYear=n.getFullYear();renderMain();};
+  c.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{const e=allEvents().find(x=>x.id===ch.dataset.id);if(e)openModal(e);});
+  c.querySelectorAll(".more").forEach(mo=>mo.onclick=()=>setView("list"));
+}
+
+function emptyHTML(){return`<div class="empty"><div class="big">🗽</div><h3>No events match</h3><p>Try a different date filter, select more venues, clear the search, or hit Refresh for live events.</p></div>`;}
+
+function toggleSave(id){
+  state.saved.has(id)?state.saved.delete(id):state.saved.add(id);
+  saveState();renderMain();
+  // also refresh modal save button if open
+  const mb=$("#mSave");if(mb&&mb.dataset.id===id){mb.classList.toggle("on",state.saved.has(id));mb.querySelector("span").textContent=state.saved.has(id)?"Saved":"Save";}
+}
+
+/* ---- modal + export ---- */
+function openModal(e){
+  const meta=CATEGORIES[e.cat],col=venueColor(e),d=new Date(e.start),fav=state.saved.has(e.id),tl=ticketLink(e);
+  const dateLine=d.toLocaleDateString([],{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  const m=$("#modal");m.style.setProperty("--accent",col);
+  m.innerHTML=`<div class="top"><button class="close" id="mClose">✕</button><div class="tag">${meta.emoji} ${meta.label}</div><h2>${esc(e.title)}</h2></div>
+    <div class="info">
+      <div class="row"><span class="ic">📅</span><div><div class="lab">When</div><div class="val">${dateLine}</div><div class="val" style="font-weight:400;color:var(--text-2)">${timeStr(e.start)}${e.end?" – "+timeStr(e.end):""}</div></div></div>
+      <div class="row"><span class="ic">📍</span><div><div class="lab">Where</div><div class="val">${esc(e.venue)}</div></div></div>
+      ${e.artist?`<div class="row"><span class="ic">★</span><div><div class="lab">Performer</div><div class="val">${esc(e.artist)}</div></div></div>`:""}
+      ${e.price?`<div class="row"><span class="ic">🎟️</span><div><div class="lab">Tickets</div><div class="val">${esc(e.price)}</div></div></div>`:""}
+      ${e.desc?`<div class="desc">${esc(e.desc)}</div>`:""}
+      <div class="src-tag">Source: ${esc(e.source||"—")}</div>
+    </div>
+    <div class="actions">
+      <a class="abtn primary" href="${tl.url}" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M13 5v14"/></svg>Buy tickets</a>
+      <div style="text-align:center;font-size:11.5px;color:var(--text-3);margin-top:-3px">Opens ${esc(tl.via)} for this event</div>
+      <div class="three">
+        <button class="abtn sec" id="gcal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>Google</button>
+        <button class="abtn sec" id="ical"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>.ics</button>
+        <button class="abtn sec${fav?" on":""}" id="mSave" data-id="${e.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="${fav?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span>${fav?"Saved":"Save"}</span></button>
+      </div>
+    </div>`;
+  $("#scrim").classList.add("show");
+  $("#mClose").onclick=closeModal;
+  $("#gcal").onclick=()=>window.open(googleUrl(e),"_blank");
+  $("#ical").onclick=()=>downloadICS(e);
+  $("#mSave").onclick=()=>{toggleSave(e.id);const b=$("#mSave");b.querySelector("svg").setAttribute("fill",state.saved.has(e.id)?"currentColor":"none");};
+}
+function closeModal(){$("#scrim").classList.remove("show");}
+$("#scrim").addEventListener("click",e=>{if(e.target.id==="scrim")closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+function fmtUTC(iso){return new Date(iso).toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";}
+function googleUrl(e){
+  const end=e.end||new Date(new Date(e.start).getTime()+2*3600*1000).toISOString();
+  const details=(e.desc?e.desc+"\n\n":"")+"Tickets: "+ticketLink(e).url;
+  return"https://calendar.google.com/calendar/render?"+new URLSearchParams({action:"TEMPLATE",text:e.title,dates:fmtUTC(e.start)+"/"+fmtUTC(end),details,location:e.venue}).toString();
+}
+function downloadICS(e){
+  const end=e.end||new Date(new Date(e.start).getTime()+2*3600*1000).toISOString();
+  const x=s=>(s||"").replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Marquee NYC//EN","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:"+e.id+"@marquee.nyc","DTSTAMP:"+fmtUTC(new Date().toISOString()),"DTSTART:"+fmtUTC(e.start),"DTEND:"+fmtUTC(end),"SUMMARY:"+x(e.title),"LOCATION:"+x(e.venue),"DESCRIPTION:"+x((e.desc?e.desc+"\n\n":"")+"Tickets: "+ticketLink(e).url),"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));a.download=e.title.replace(/[^\w]+/g,"_").slice(0,40)+".ics";a.click();URL.revokeObjectURL(a.href);
+  toast("Calendar file downloaded");
+}
+
+/* ---- live data ---- */
+function normalizeCat(c){c=(c||"").toLowerCase();if(/opera|classic|symphon|orchestra|philharmon/.test(c))return"classical";if(/broadway|theat|musical|play/.test(c))return"broadway";if(/sport|game|baseball|basketball|hockey|knicks|rangers|yankees|mets|nets/.test(c))return"sports";return"concerts";}
+function matchVenue(name,cat){const l=(name||"").toLowerCase();const h=VENUES.find(v=>l.includes(v.name.toLowerCase())||v.name.toLowerCase().includes(l));return h?{venue:h.name,cat:h.cat,url:h.url}:{venue:name||"NYC venue",cat:cat||"concerts",url:null};}
+async function callClaude(prompt){
+  // 1) Preferred: the deployed Netlify serverless backend — makes live features work on ANY device.
+  try{
+    const r=await fetch("/.netlify/functions/marquee",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});
+    if(r.ok){const d=await r.json();if(d&&typeof d.text==="string")return d.text;}
+    else if(r.status>=400&&r.status!==404){const d=await r.json().catch(()=>({}));throw new Error("API "+(d.error||r.status));}
+  }catch(e){if(/^API /.test(e.message))throw e;/* no backend here — fall through */}
+  // 2) Fallback: direct call (works inside Claude's sandbox).
+  const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}],tools:[{type:"web_search_20250305",name:"web_search"}]})});
+  if(!res.ok)throw new Error("API "+res.status);
+  const data=await res.json();
+  return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+}
+function liveErr(err){
+  if(/^API /.test(err.message))return err.message.replace(/^API /,"Live update error: ");
+  return "Live web updates need the backend (or the in-Claude version). Everything else works fully — browse, filter, save & export.";
+}
+function parseEvents(text,src){
+  const s=text.indexOf("["),e=text.lastIndexOf("]");if(s<0||e<0)return[];
+  let arr;try{arr=JSON.parse(text.slice(s,e+1));}catch(_){return[];}
+  const out=[];
+  arr.forEach((o,i)=>{
+    if(!o||!o.title||!o.date)return;
+    let iso;try{const dt=new Date(o.date+(o.time?" "+o.time:" 19:30"));if(isNaN(dt))return;iso=dt.toISOString();}catch(_){return;}
+    const cat=normalizeCat(o.category||o.type),mp=matchVenue(o.venue,cat);
+    out.push({id:"l"+Date.now()+"_"+i,title:String(o.title).slice(0,120),artist:o.artist?String(o.artist).slice(0,80):"",venue:mp.venue,cat:mp.cat,price:o.price?String(o.price).slice(0,40):"",start:iso,end:new Date(new Date(iso).getTime()+2.5*3600*1000).toISOString(),desc:o.description?String(o.description).slice(0,260):"",ticketUrl:o.ticketUrl||o.url||mp.url||"#",source:src});
+  });
+  return out;
+}
+function mergeLive(fresh){
+  const seen=new Set(allEvents().map(dedupeKey));   // dedupe against samples + existing live
+  const add=[];
+  fresh.forEach(e=>{const k=dedupeKey(e);if(!seen.has(k)){seen.add(k);add.push(e);state.selected.add(vkey(e.cat,e.venue));}});
+  state.liveEvents=[...state.liveEvents,...add];
+  return add.length;
+}
+async function refreshLive(){
+  const b=$("#refreshBtn"),old=b.innerHTML;b.disabled=true;b.innerHTML=`<span class="spinner"></span>`;
+  try{
+    const prompt=`Search the web for real, currently-scheduled upcoming events in New York City in the next ~3 weeks across: classical/opera (NY Philharmonic, Metropolitan Opera, Carnegie Hall), Broadway theater, major concerts (Madison Square Garden, Barclays Center, Radio City Music Hall), and pro sports (Knicks, Rangers, Yankees, Mets, Nets). You may also use: ${state.sources.join(", ")}.
+Return ONLY a JSON array (no prose/markdown) of up to 8 events. Keys exactly: "title","artist","venue","category","date" (YYYY-MM-DD),"time" (HH:MM 24h),"price","ticketUrl","description". For "ticketUrl" give the DIRECT page to buy that specific event (the event's own ticket/detail page), never a venue homepage. Use real venues and real URLs. Start with [ end with ].`;
+    const n=mergeLive(parseEvents(await callClaude(prompt),"Live web search"));
+    if(!n){toast("No new events found — try again");}
+    else{state.lastUpdated=new Date().toISOString();await saveState();renderSidebar();renderMain();toast(`Added ${n} live event${n!==1?"s":""}`);}
+  }catch(err){toast(liveErr(err));}
+  finally{b.disabled=false;b.innerHTML=old;}
+}
+async function fetchFromSource(url){
+  const g=$("#srcGo"),old=g.innerHTML;g.disabled=true;g.innerHTML=`<span class="spinner"></span>`;
+  try{
+    const prompt=`Use web search to find upcoming NYC events listed at or associated with: ${url} (next ~4 weeks; concerts, theater, opera, classical, sports, festivals).
+Return ONLY a JSON array (no prose/markdown) of up to 8 events. Keys exactly: "title","artist","venue","category","date" (YYYY-MM-DD),"time" (HH:MM 24h),"price","ticketUrl","description". For "ticketUrl" give the DIRECT page to buy that specific event, never a venue homepage. Real info & URLs. Start with [ end with ].`;
+    const label="From "+url.replace(/^https?:\/\/(www\.)?/,"").split("/")[0];
+    const n=mergeLive(parseEvents(await callClaude(prompt),label));
+    if(!state.sources.includes(url))state.sources.push(url);
+    if(!n){toast("No new events found at that URL");}
+    else{state.lastUpdated=new Date().toISOString();await saveState();renderSidebar();renderMain();toast(`Added ${n} event${n!==1?"s":""} (duplicates skipped)`);$("#srcInput").value="";}
+    renderSources();
+  }catch(err){toast(liveErr(err));}
+  finally{g.disabled=false;g.innerHTML=old;}
+}
+function renderSources(){
+  const h=$("#srcList");h.innerHTML="";
+  if(!state.sources.length){h.innerHTML=`<div style="font-size:12px;color:var(--text-3)">No saved sources.</div>`;return;}
+  const head=document.createElement("div");head.className="src-h";head.textContent="Active sources";h.appendChild(head);
+  state.sources.forEach(u=>{const it=document.createElement("div");it.className="src-item";
+    it.innerHTML=`<span>🔗</span><span class="u">${esc(u.replace(/^https?:\/\/(www\.)?/,""))}</span><button>✕</button>`;
+    it.querySelector("button").onclick=()=>{state.sources=state.sources.filter(x=>x!==u);saveState();renderSources();};
+    h.appendChild(it);});
+}
+
+/* ---- wiring ---- */
+function setView(v){state.view=v;saveState();document.querySelectorAll("#viewToggle button").forEach(b=>b.classList.toggle("on",b.dataset.view===v));renderMain();}
+document.querySelectorAll("#viewToggle button").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("#search").addEventListener("input",e=>{state.query=e.target.value;renderMain();});
+document.querySelectorAll("#dateChips .chip-f:not(.save)").forEach(b=>b.onclick=()=>{
+  state.dateFilter=b.dataset.d;state.savedOnly=false;
+  document.querySelectorAll("#dateChips .chip-f").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");saveState();renderMain();
+});
+$("#savedChip").onclick=()=>{
+  state.savedOnly=!state.savedOnly;
+  $("#savedChip").classList.toggle("on",state.savedOnly);
+  if(state.savedOnly){document.querySelectorAll("#dateChips .chip-f:not(.save)").forEach(x=>x.classList.remove("on"));}
+  else{state.dateFilter="all";document.querySelector('[data-d="all"]').classList.add("on");}
+  saveState();renderMain();
+};
+$("#selAll").onclick=()=>{state.selected=new Set(VENUES.map(v=>vkey(v.cat,v.name)));allEvents().forEach(e=>state.selected.add(vkey(e.cat,e.venue)));saveState();renderSidebar();renderMain();};
+$("#selNone").onclick=()=>{state.selected=new Set();saveState();renderSidebar();renderMain();};
+$("#refreshBtn").onclick=refreshLive;
+const dd=$("#sourceDD");
+$("#addBtn").onclick=e=>{e.stopPropagation();dd.classList.toggle("show");renderSources();};
+document.addEventListener("click",e=>{if(!e.target.closest(".ddwrap"))dd.classList.remove("show");});
+$("#srcGo").onclick=()=>{const u=$("#srcInput").value.trim();if(!u){toast("Paste a URL first");return;}fetchFromSource(/^https?:\/\//.test(u)?u:"https://"+u);};
+$("#srcInput").addEventListener("keydown",e=>{if(e.key==="Enter")$("#srcGo").click();});
+$("#filterFab").onclick=()=>$("#side").classList.add("open");
+$("#sideX").onclick=()=>$("#side").classList.remove("open");
+
+/* scroll reveal */
+const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target);}}),{threshold:.1});
+
+/* ---- init ---- */
+(async function(){
+  state.events=buildSamples();
+  await loadState();
+  document.querySelectorAll("#viewToggle button").forEach(b=>b.classList.toggle("on",b.dataset.view===state.view));
+  document.querySelectorAll("#dateChips .chip-f").forEach(x=>x.classList.remove("on"));
+  if(state.savedOnly)$("#savedChip").classList.add("on");
+  else (document.querySelector(`[data-d="${state.dateFilter}"]`)||document.querySelector('[data-d="all"]')).classList.add("on");
+  // hero stats
+  const total=allEvents().length;
+  $("#heroStats").innerHTML=`<span><b>${total}+</b> events</span><span><b>${VENUES.length}</b> venues</span><span><b>4</b> categories</span>`;
+  state.liveEvents.forEach(e=>state.selected.add(vkey(e.cat,e.venue)));
+  renderSidebar();renderMain();
+  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+})();
+</script>
+</body>
+</html>
